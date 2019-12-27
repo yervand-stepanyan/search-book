@@ -1,8 +1,5 @@
 const labels = {
-  title: "Title: ",
-  authorName: "Author Name: ",
-  publishYear: "First publish year: ",
-  subject: "Subject: "
+  title: "Title: "
 };
 
 const input = document.querySelector('input');
@@ -13,6 +10,10 @@ const pagination = document.querySelector('.pagination');
 
 let currentPage;
 let pageCount;
+let resultListFromLocalStorage = [];
+let numFound;
+let param;
+let inputValue = "";
 
 input.addEventListener("keypress", (event) => {
   if (event.key === "Enter") {
@@ -24,125 +25,71 @@ button.addEventListener("click", () => {
   runCode();
 });
 
+dataFromLocalStorage();
+
 function runCode() {
-  currentPage = 1;
-  const value = input.value.toLowerCase();
+  if (resultListFromLocalStorage.length !== 0) {
+    input.value = inputValue;
 
-  const param = (/\s/.test(value)) ? value.split(' ').join('+') : value;
+    clearElements(resultCount);
 
-  fetch(`https://openlibrary.org/search.json?q=${param}`)
-    .then(response => response.json())
-    .then(response => {
-      const resultList = [];
+    clearElements(pagination);
 
-      clearElements(resultCount);
-      clearElements(pagination);
+    createCountOfResults();
 
-      const numFound = response.numFound;
+    createPagination(numFound);
 
-      const label = createElement('label');
-      label.setAttribute('for', 'resultSpan');
-      const span = createElement('span', ['span']);
-      span.setAttribute('id', 'resultSpan');
+    const pageNumbers = document.querySelectorAll('.pageNumber');
 
-      label.textContent = "Total count of results: ";
-      span.textContent = numFound;
+    makePageVisited(pageNumbers, currentPage);
 
-      resultCount.appendChild(label);
-      resultCount.appendChild(span);
+    clearElements(resultListDiv);
 
-      if (numFound > 100) {
-        pageCount = Math.ceil(numFound / 100);
+    createData(resultListFromLocalStorage);
 
-        if (pageCount > 20) {
-          pageCount = 20;
-        }
+    addEventPages(param);
 
-        for (let i = 0; i < pageCount; i++) {
-          const pages = createElement('div', ['pageNumber']);
-          const pageNumber = createElement('span', ['numberSpan']);
+  } else {
+    currentPage = 1;
+    localStorage.setItem("currentPage", JSON.stringify(currentPage));
 
-          pageNumber.textContent = (i + 1);
-          pages.appendChild(pageNumber);
-          pagination.appendChild(pages);
-        }
+    localStorage.setItem("inputValue", JSON.stringify(input.value));
 
-        if (pageCount > 1) {
-          const prev = createElement('div', ['prev', 'pageNumber']);
-          const next = createElement('div', ['next', 'pageNumber']);
-          const arrowPrev = createElement('span', ['prevArrow']);
-          const arrowNext = createElement('span', ['nextArrow']);
+    const value = input.value.toLowerCase();
 
-          arrowPrev.textContent = '<<';
-          arrowNext.textContent = '>>';
+    const param = (/\s/.test(value)) ? value.split(' ').join('+') : value;
+    localStorage.setItem("param", JSON.stringify(param));
 
-          prev.appendChild(arrowPrev);
-          next.appendChild(arrowNext);
-          pagination.prepend(prev);
-          pagination.appendChild(next);
-        }
-        const pageNumbers = document.querySelectorAll('.pageNumber');
+    fetch(`https://openlibrary.org/search.json?q=${param}`)
+      .then(response => response.json())
+      .then(response => {
+        const resultList = [];
 
-        makePageVisited(pageNumbers, 1);
-      } else {
-        const pages = createElement('div', ['pageNumber']);
-        const pageNumber = createElement('span', ['numberSpan']);
+        clearElements(resultCount);
+        clearElements(pagination);
 
-        pageNumber.textContent = 1;
-        pages.appendChild(pageNumber);
-        pagination.appendChild(pages);
+        const numFound = response.numFound;
+        localStorage.setItem("numFound", JSON.stringify(numFound));
 
-        const pageNumbers = document.querySelectorAll('.pageNumber');
+        createCountOfResults();
 
-        makePageVisited(pageNumbers, 0);
-      }
+        createPagination(numFound);
 
-      return pushToArray(response['docs'], resultList);
-    })
-    .then(response => {
-      clearElements(resultListDiv);
+        pushToArray(response['docs'], resultList);
+        localStorage.setItem("resultList", JSON.stringify(resultList));
 
-      createData(response);
+        return resultList;
+      })
+      .then(response => {
+        clearElements(resultListDiv);
 
-      const pageNumbers = document.querySelectorAll('.pageNumber');
+        createData(response);
 
-      pageNumbers.forEach(pageNumber => {
-        pageNumber.addEventListener("click", (event) => {
-          const page = Number(event.target.innerText);
+        addEventPages(param);
 
-          if (typeof page === "number" && !isNaN(page)) {
-            currentPage = page;
-
-            fetchData(param, page);
-
-            if (pageNumbers.length > 1)
-              makePageVisited(pageNumbers, page);
-            else
-              makePageVisited(pageNumbers, 0);
-          } else if (isNaN(page)) {
-            if (event.target.innerText === "<<") {
-              if (currentPage > 1) {
-                currentPage -= 1;
-
-                fetchData(param, currentPage);
-
-                makePageVisited(pageNumbers, currentPage);
-              }
-
-            } else if (event.target.innerText === ">>") {
-              if (currentPage < pageCount) {
-                currentPage += 1;
-
-                fetchData(param, currentPage);
-
-                makePageVisited(pageNumbers, currentPage);
-              }
-            }
-          }
-        });
-      });
-    })
-    .catch(console.log);
+      })
+      .catch(console.log);
+  }
 }
 
 function createElement(tagName, classList = []) {
@@ -160,24 +107,35 @@ function clearElements(element) {
 
 function createData(element) {
   element.forEach(res => {
+    const anchor = createElement('a', ['anchorTag']);
+    anchor.setAttribute("href", "../DetailsPage/details.html");
+
     const bookInfo = createElement('div', ['bookInfo']);
 
-    for (let key in res) {
-      const fields = createElement('div', ['fields']);
-      const label = createElement('label');
-      label.setAttribute('for', key);
-      const span = createElement('span', ['span']);
-      span.setAttribute('id', key);
+    // for (let key in res) {
+    const fields = createElement('div', ['fields']);
+    const label = createElement('label');
+    label.setAttribute('for', "title");
+    const span = createElement('span', ['span']);
+    span.setAttribute('id', "title");
 
-      label.textContent = labels[key];
-      span.textContent = res[key];
+    label.textContent = labels.title;
+    span.textContent = res["title"];
 
-      fields.appendChild(label);
-      fields.appendChild(span);
-      bookInfo.appendChild(fields);
-    }
+    fields.appendChild(label);
+    fields.appendChild(span);
+
+    anchor.appendChild(fields);
+    bookInfo.appendChild(anchor);
+    // }
 
     resultListDiv.appendChild(bookInfo);
+
+    anchor.addEventListener("click", (event) => {
+      const titleText = event.target.closest("div").textContent.slice(7);
+
+      localStorage.setItem("titleText", JSON.stringify(titleText));
+    });
   });
 }
 
@@ -186,7 +144,12 @@ function fetchData(param, currentPage) {
 
   fetch(`https://openlibrary.org/search.json?q=${param}&page=${currentPage}`)
     .then(response => response.json())
-    .then(response => pushToArray(response['docs'], newResultList))
+    .then(response => {
+      pushToArray(response['docs'], newResultList);
+      localStorage.setItem("resultList", JSON.stringify(newResultList));
+
+      return newResultList;
+    })
     .then(response => {
       clearElements(resultListDiv);
 
@@ -215,3 +178,124 @@ function makePageVisited(element, page) {
   element[page].style.backgroundColor = "#006600";
   element[page].style.fontWeight = "bold";
 }
+
+function createPagination(numFound) {
+  if (numFound > 100) {
+    pageCount = Math.ceil(numFound / 100);
+
+    if (pageCount > 20) {
+      pageCount = 20;
+    }
+
+    for (let i = 0; i < pageCount; i++) {
+      const pages = createElement('div', ['pageNumber']);
+      const pageNumber = createElement('span', ['numberSpan']);
+
+      pageNumber.textContent = (i + 1);
+      pages.appendChild(pageNumber);
+      pagination.appendChild(pages);
+    }
+
+    if (pageCount > 1) {
+      const prev = createElement('div', ['prev', 'pageNumber']);
+      const next = createElement('div', ['next', 'pageNumber']);
+      const arrowPrev = createElement('span', ['prevArrow']);
+      const arrowNext = createElement('span', ['nextArrow']);
+
+      arrowPrev.textContent = '<<';
+      arrowNext.textContent = '>>';
+
+      prev.appendChild(arrowPrev);
+      next.appendChild(arrowNext);
+      pagination.prepend(prev);
+      pagination.appendChild(next);
+    }
+    const pageNumbers = document.querySelectorAll('.pageNumber');
+
+    makePageVisited(pageNumbers, 1);
+  } else {
+    const pages = createElement('div', ['pageNumber']);
+    const pageNumber = createElement('span', ['numberSpan']);
+
+    pageNumber.textContent = 1;
+    pages.appendChild(pageNumber);
+    pagination.appendChild(pages);
+
+    const pageNumbers = document.querySelectorAll('.pageNumber');
+
+    makePageVisited(pageNumbers, 0);
+  }
+}
+
+function createCountOfResults() {
+  const label = createElement('label');
+  label.setAttribute('for', 'resultSpan');
+  const span = createElement('span', ['span']);
+  span.setAttribute('id', 'resultSpan');
+
+  label.textContent = "Total count of results: ";
+  span.textContent = numFound;
+
+  resultCount.appendChild(label);
+  resultCount.appendChild(span);
+}
+
+function addEventPages(param) {
+  const pageNumbers = document.querySelectorAll('.pageNumber');
+
+  pageNumbers.forEach(pageNumber => {
+    pageNumber.addEventListener("click", (event) => {
+      const page = Number(event.target.innerText);
+
+      if (typeof page === "number" && !isNaN(page)) {
+        currentPage = page;
+        localStorage.setItem("currentPage", JSON.stringify(currentPage));
+
+        fetchData(param, page);
+
+        if (pageNumbers.length > 1)
+          makePageVisited(pageNumbers, page);
+        else
+          makePageVisited(pageNumbers, 0);
+      } else if (isNaN(page)) {
+        if (event.target.innerText === "<<") {
+          if (currentPage > 1) {
+            currentPage -= 1;
+            localStorage.setItem("currentPage", JSON.stringify(currentPage));
+
+            fetchData(param, currentPage);
+
+            makePageVisited(pageNumbers, currentPage);
+          }
+
+        } else if (event.target.innerText === ">>") {
+          if (currentPage < pageCount) {
+            currentPage += 1;
+            localStorage.setItem("currentPage", JSON.stringify(currentPage));
+
+            fetchData(param, currentPage);
+
+            makePageVisited(pageNumbers, currentPage);
+          }
+        }
+      }
+    });
+  });
+}
+
+function dataFromLocalStorage() {
+  if (localStorage.getItem("resultList") !== null) {
+    resultListFromLocalStorage = JSON.parse(localStorage.getItem("resultList"));
+    currentPage = JSON.parse(localStorage.getItem("currentPage"));
+    numFound = JSON.parse(localStorage.getItem("numFound"));
+    param = JSON.parse(localStorage.getItem("param"));
+    inputValue = JSON.parse(localStorage.getItem("inputValue"));
+
+    runCode();
+  }
+}
+
+
+// authorName: "Author Name: ",
+//   publishYear: "First publish year: ",
+//   subject: "Subject: "

@@ -1,0 +1,47 @@
+body {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+#mainDiv {
+    display: flex;
+    justify-content: center;
+    /*align-items: center;*/
+    flex-direction: column;
+    background-image: url(https://bit.ly/2QkU0Ch);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.bookInfo {
+    width: 400px;
+    text-align: left;
+    margin: 20px auto 0;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 3px 3px rgba(32, 33, 36, .28);
+    background-color: #cce5cc;
+    border: none;
+}
+
+#result {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+label {
+    font-weight: bold;
+}
+
+.span {
+    margin-left: 20px;
+}
+
+.fields {
+    margin: 5px 0;
+    display: flex;
+}
