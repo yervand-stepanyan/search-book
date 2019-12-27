@@ -6,12 +6,17 @@ const labels = {
 };
 
 const result = document.querySelector("#result");
+const spanLogout = document.querySelector("#spanLogout");
 
 const resultList = JSON.parse(localStorage.getItem("resultList"));
 const titleText = JSON.parse(localStorage.getItem("titleText"));
 
 const book = resultList.find(item => item.title === titleText);
 localStorage.setItem("book", JSON.stringify(book));
+
+spanLogout.addEventListener("click", () => {
+  localStorage.clear();
+});
 
 createData(book);
 
@@ -22,7 +27,7 @@ function createData(book) {
     const fields = createElement('div', ['fields']);
     const label = createElement('label');
     label.setAttribute('for', key);
-    const span = createElement('span', ['span']);
+    const span = createElement('span', ['spanText']);
     span.setAttribute('id', key);
 
     label.textContent = labels[key];

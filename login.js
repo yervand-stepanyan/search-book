@@ -1,6 +1,7 @@
 const btn = document.querySelector("#btn");
 const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
+const anchor = document.querySelector("a");
 
 btn.addEventListener("click", () => {
   submit();
@@ -13,10 +14,9 @@ function submit() {
   const user = {username, password};
 
   if (user.username === "" && user.password === "") {
-    return false;
+    anchor.href = ".";
   }
 
   usernameInput.value = "";
   passwordInput.value = "";
-
 }

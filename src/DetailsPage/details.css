@@ -6,8 +6,6 @@ body {
 
 #mainDiv {
     display: flex;
-    justify-content: center;
-    /*align-items: center;*/
     flex-direction: column;
     background-image: url(https://bit.ly/2QkU0Ch);
     background-position: center;
@@ -15,6 +13,24 @@ body {
     background-size: cover;
     background-attachment: fixed;
     min-height: 100vh;
+}
+
+#logoutDiv {
+    padding: 15px 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+#spanLogout {
+    background-color: white;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #006600;
 }
 
 .bookInfo {
@@ -37,7 +53,7 @@ label {
     font-weight: bold;
 }
 
-.span {
+.spanText {
     margin-left: 20px;
 }
 

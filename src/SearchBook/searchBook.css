@@ -6,7 +6,6 @@ body {
 
 #mainDiv {
     display: flex;
-    justify-content: center;
     flex-direction: column;
     background-image: url(https://bit.ly/2QkU0Ch);
     background-position: center;
@@ -14,6 +13,19 @@ body {
     background-size: cover;
     background-attachment: fixed;
     min-height: 100vh;
+}
+
+#logoutDiv {
+    padding: 15px 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#spanLogout {
+    background-color: white;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #006600;
 }
 
 #inputDiv {
@@ -33,7 +45,6 @@ input {
 }
 
 button {
-    /*width: 6%;*/
     height: 40px;
     border-radius: 20px;
     border: none;
@@ -82,12 +93,13 @@ button:hover {
 #resultList {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 .bookInfo {
     width: 400px;
     text-align: left;
-    margin: 20px auto 0;
+    margin: 0 auto;
     padding: 20px;
     border-radius: 20px;
     box-shadow: 3px 3px rgba(32, 33, 36, .28);
@@ -100,11 +112,15 @@ a {
     color: black;
 }
 
+.anchorTag {
+    margin-top: 20px;
+}
+
 label {
     font-weight: bold;
 }
 
-.span {
+.spanText {
     margin-left: 20px;
 }
 

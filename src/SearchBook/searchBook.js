@@ -7,6 +7,7 @@ const button = document.querySelector('button');
 const resultCount = document.querySelector('#resultCount');
 const resultListDiv = document.querySelector('#resultList');
 const pagination = document.querySelector('.pagination');
+const spanLogout = document.querySelector("#spanLogout");
 
 let currentPage;
 let pageCount;
@@ -25,6 +26,10 @@ button.addEventListener("click", () => {
   runCode();
 });
 
+spanLogout.addEventListener("click", () => {
+  localStorage.clear();
+});
+
 dataFromLocalStorage();
 
 function runCode() {
@@ -35,7 +40,7 @@ function runCode() {
 
     clearElements(pagination);
 
-    createCountOfResults();
+    createCountOfResults(numFound);
 
     createPagination(numFound);
 
@@ -71,7 +76,7 @@ function runCode() {
         const numFound = response.numFound;
         localStorage.setItem("numFound", JSON.stringify(numFound));
 
-        createCountOfResults();
+        createCountOfResults(numFound);
 
         createPagination(numFound);
 
@@ -112,11 +117,10 @@ function createData(element) {
 
     const bookInfo = createElement('div', ['bookInfo']);
 
-    // for (let key in res) {
     const fields = createElement('div', ['fields']);
     const label = createElement('label');
     label.setAttribute('for', "title");
-    const span = createElement('span', ['span']);
+    const span = createElement('span', ['spanText']);
     span.setAttribute('id', "title");
 
     label.textContent = labels.title;
@@ -125,11 +129,10 @@ function createData(element) {
     fields.appendChild(label);
     fields.appendChild(span);
 
-    anchor.appendChild(fields);
-    bookInfo.appendChild(anchor);
-    // }
+    bookInfo.appendChild(fields);
+    anchor.appendChild(bookInfo);
 
-    resultListDiv.appendChild(bookInfo);
+    resultListDiv.appendChild(anchor);
 
     anchor.addEventListener("click", (event) => {
       const titleText = event.target.closest("div").textContent.slice(7);
@@ -227,10 +230,10 @@ function createPagination(numFound) {
   }
 }
 
-function createCountOfResults() {
+function createCountOfResults(numFound) {
   const label = createElement('label');
   label.setAttribute('for', 'resultSpan');
-  const span = createElement('span', ['span']);
+  const span = createElement('span', ['spanText']);
   span.setAttribute('id', 'resultSpan');
 
   label.textContent = "Total count of results: ";
@@ -294,8 +297,3 @@ function dataFromLocalStorage() {
     runCode();
   }
 }
-
-
-// authorName: "Author Name: ",
-//   publishYear: "First publish year: ",
-//   subject: "Subject: "
