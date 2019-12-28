@@ -13,7 +13,7 @@ function submit() {
 
   const user = {username, password};
 
-  if (user.username === "" && user.password === "") {
+  if (user.username === "" || user.password === "") {
     anchor.href = ".";
   }
 
